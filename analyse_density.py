@@ -14,13 +14,12 @@ radius = 50 # pixels
 
 plt1 = PointPlotter(namein, nameout, init=nameout)
 plt1.point_color = 'red5'
-plt1.show(mode=7, zoom='tight').close()
+plt1.show(zoom='tight').close()
 
 # Analysis ################################
 settings.enable_default_keyboard_callbacks = True
 plt2 = Plotter(N=2, sharecam=False)
 pts, dens, dens_array = plt1.compute_density(radius)
-dens.pipeline.show()
 intensities = plt1.get_intensities()
 fig = plot(
     dens_array, intensities,
@@ -28,7 +27,8 @@ fig = plot(
     xtitle=f"Density in radius {radius} (pixels)",
     ytitle="Sox9 intensity",
     marker="*",   # marker style
-    mc="dr",      # marker color
+    mc="red4",    # marker color
+    aspect=1/1,
 )
 plt2.at(0).show(pts, dens, plt1.pic.alpha(0.2), zoom='tight')
 plt2.at(1).show(fig, zoom='tight')
