@@ -24,7 +24,7 @@ class PointPlotter(Plotter):
         self.point_color = "red8"
         self.filename = filename
         self.nameout = nameout
-        self.pic = Picture(filename).bw()
+        self.pic = Picture(filename).bw().invert().flip().write("a.png")
 
         self.cpoints = []
         self.points = None
@@ -46,7 +46,7 @@ class PointPlotter(Plotter):
         if not evt.actor:
             return
         if evt.actor.name == "points":
-            # remove clicked point
+            # remove clicked point if clicked twice
             pid = self.points.closest_point(evt.picked3d, return_point_id=True)
             self.cpoints.pop(pid)
             self.update()
@@ -67,7 +67,7 @@ class PointPlotter(Plotter):
     def on_key_press(self, evt):
         if "q" in evt.keypress.lower():
             out = np.round(self.cpoints).astype(int)
-            np.savetxt(".tmp.csv", out, delimiter=",") # because one can forget to save
+            np.savetxt(".tmp.csv", out, delimiter=",") # one can forget to save
             self.close()
             return
         elif evt.keypress == "c":
@@ -87,7 +87,7 @@ class PointPlotter(Plotter):
             self.points = Points(np.array(self.cpoints)[:, (0, 1)])
             self.points.ps(self.point_size).c(self.point_color)
             self.points.name = "points"
-            self.points.pickable(1)
+            self.points.pickable(True)
             self.add(self.points)
 
     def get_coordinates(self):
@@ -98,11 +98,10 @@ class PointPlotter(Plotter):
     def get_intensities(self):
         return np.round(self.cpoints).astype(int)[:, 2]
 
-    def compute_density(self, radius=None):
+    def compute_density(self, radius):
         cc = self.get_coordinates()
         pts = Points(cc)
-        vol = pts.density(radius=radius).c("Paired_r")  # returns a Volume
-        r = precision(vol.info["radius"], 2)  # retrieve radius value
-        vol.add_scalarbar3d(title="Density (counts in r_search =" + r + ")", c="k")
-        mpts = probe_points(vol, pts).point_size(3)  #.print()
-        return pts, vol, mpts.pointdata["ImageScalars"]
+        vol = pts.density(radius).c("Paired_r")  # returns a Volume
+        vol.add_scalarbar3d(title=f"Density (counts in r_search ={radius})", c="k")
+        mpts = probe_points(vol, pts).ps(5).c("black")
+        return mpts, vol, mpts.pointdata["ImageScalars"]

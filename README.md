@@ -1,13 +1,18 @@
 
-## Compute cell density vs gene expression data.
+## Compute cell density vs gene expression data
 
 ### Usage
+
+Install:
 ```
 pip install vedo
+```
 
+Run:
+```
 python analyse_density.py test_image.png
 ```
 
-![](https://user-images.githubusercontent.com/32848391/221221690-79e35b70-634f-4105-adf2-24e43039fafd.png)
+![](https://user-images.githubusercontent.com/32848391/221247534-65fc17a6-aa79-4246-b9fe-f09f0b10c7d9.png)
 
-![](https://user-images.githubusercontent.com/32848391/221221059-e2f84ad6-4a9d-42e7-8e18-44fe0b25321e.png)
+![](https://user-images.githubusercontent.com/32848391/221247578-ebf35ec9-71a2-4b93-9f39-dd91019f0636.png)
