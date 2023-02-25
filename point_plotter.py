@@ -24,7 +24,7 @@ class PointPlotter(Plotter):
         self.point_color = "red8"
         self.filename = filename
         self.nameout = nameout
-        self.pic = Picture(filename).bw().invert().flip().write("a.png")
+        self.pic = Picture(filename)#.bw()
 
         self.cpoints = []
         self.points = None
