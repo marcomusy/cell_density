@@ -1,3 +1,4 @@
 .tmp.csv
 .vedo_pipeline*
 __pycache__
+test_image_data.png
