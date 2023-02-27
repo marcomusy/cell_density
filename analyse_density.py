@@ -7,12 +7,12 @@ from point_plotter import Plotter, PointPlotter
 
 # Data ###################################
 namein  = sys.argv[1]
-nameout = namein.split('.')[-2]+"_data.csv"
-radius = 50  # pixels
+nameout = namein.replace('.tif','') + "_data.csv"
+radius = 100  # pixels
 
 plt1 = PointPlotter(namein, nameout, init=nameout)
 plt1.point_color = 'red5'
-plt1.show(zoom='tight').close()
+plt1.show(zoom='tightest', mode="image").close()
 
 # Analysis ################################
 settings.enable_default_keyboard_callbacks = True
@@ -34,8 +34,8 @@ fig = plot(
 fig += fit([dens_array, intensities])
 
 plt2 = Plotter(N=2, sharecam=False)
-plt2.at(0).show(namein, pts, dens, plt1.pic.alpha(0.2), zoom='tight')
+plt2.at(0).show(namein, pts, dens, plt1.pic.alpha(0.2), zoom='tigh')
 plt2.at(1).show(fig, zoom='tight')
-plt2.screenshot(nameout.replace(".csv",".png"))
+plt2.screenshot(nameout.replace("data.csv","screenshot.png"))
 plt2.interactive().close()
 
