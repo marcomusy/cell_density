@@ -2,3 +2,6 @@
 .vedo_pipeline*
 __pycache__
 test_image_data.png
+test_image_data.csv
+test_image_screenshot.png
+tmp_saved_coords.csv
