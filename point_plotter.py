@@ -20,11 +20,12 @@ class PointPlotter(Plotter):
         kwargs["bg"] = "black"
         super().__init__(**kwargs)
 
-        self.point_size = 10
+        self.point_size = 15
         self.point_color = "red8"
         self.filename = filename
         self.nameout = nameout
-        self.pic = Picture(filename)#.bw()
+        self.pic = Picture(filename).flip("y").smooth(1)
+        #self.pic_copy = self.pic.clone() #make a copy
 
         self.cpoints = []
         self.points = None
