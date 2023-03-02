@@ -12,7 +12,7 @@ radius = 50  # pixels
 
 plt1 = PointPlotter(namein, nameout, init=nameout)
 plt1.point_color = 'red5'
-plt1.show(zoom='tight').close()
+plt1.show(zoom='tight', mode='image').close()
 
 # Analysis ################################
 settings.enable_default_keyboard_callbacks = True
