@@ -1,13 +1,12 @@
 """EDU intensity"""
 import sys
-
 import numpy as np
 import vedo
 from vedo.pyplot import histogram, matrix
 
-vedo.settings.use_depth_peeling = True
+vedo.settings.use_parallel_projection = True
 vedo.settings.remember_last_figure_format = True
-
+vedo.settings.default_font = "Theemim"
 
 # Utils
 def simple_mean_window_conv(data, r):
@@ -28,66 +27,57 @@ def simple_mean_window_conv(data, r):
     return w
 
 
+def pick_threshold(event):
+    global mat
+    if event.actor and event.at == 2:
+        threshold = event.picked3d[0]
+        bin_data = (data > threshold).astype(np.int_)
+
+        plt.at(1).remove(mat)
+        mat = matrix(
+            bin_data,
+            cmap="Greys",
+            title=f"Threshold = {threshold:.2f}",
+            scale=0,  # size of bin labels; set it to 0 to remove labels
+            lw=1,  # separator line width
+        )
+        plt.at(1).add(mat)
+        arr = vedo.Arrow2D([threshold, 15], [threshold, 0]).z(1)
+        plt.at(2).remove("Arrow2D").add(arr)
+        plt.render()
+
+
 # Data
 file = sys.argv[1]
 radius = 25
 pic = vedo.Picture(file)
 
-
 # Reduce dimension of data
-
 data = simple_mean_window_conv(pic.tonumpy(), radius)
 
 # Histogram
 hst = histogram(
     data.flatten(),
-    # ylim=(0, 90),
-    title=f"Intensity Window (r={radius})",
-    xtitle="measured variable",
+    xtitle=f"Intensity in r={radius} pixel window",
     c="red4",
     gap=0,  # no gap between bins
-    padding=0,  # no extra spaces
     label="data",
-    aspect=1
-    # bins=100
+    aspect=1,
 )
-
-
-def pick_treshold(event, data=data):
-    global mat
-    if not event.actor:
-        return
-
-    treshold = event.picked3d[0]
-    bin_data = (data > treshold).astype(np.int_)
-
-    # plt.at(1).clear().remove(mat)
-    mat = matrix(
-        bin_data,
-        cmap="Greys",
-        title=f"Treshold {treshold:.2f}",
-        scale=0,  # size of bin labels; set it to 0 to remove labels
-        lw=1,  # separator line width
-    )
-    plt.at(1).remove('Matrix').add(mat)
-    plt.render()
-
-
 # print(hst.frequencies)
 
-# Matrix
 mat = matrix(
     data,
     cmap="Greys",
-    title="Treshold 0",
+    title="Threshold: None",
     scale=0,  # size of bin labels; set it to 0 to remove labels
     lw=1,  # separator line width
 )
 
 # Plotting
 plt = vedo.Plotter(N=3, sharecam=False)
+plt.add_callback("on_click", pick_threshold)
 plt.at(0).show(pic, zoom="tight")
 plt.at(1).show(mat, zoom="tight")
-plt.at(2).show(hst, zoom="tight")
-plt.add_callback("on_click", pick_treshold)
+plt.at(2).show(hst, zoom="tight", mode="image")
 plt.interactive().close()
