@@ -8,38 +8,43 @@ settings.enable_default_keyboard_callbacks = False
 txt = """Click to add a point
 Right-click to remove it
 Press w to write points
-Press q to continue"""
+Press q to continue
+Press a to toggle image"""
 instructions = Text2D(
     txt, pos="bottom-left", font="Quikhand", c="white", bg="green4", alpha=0.75
 )
 
+
 #############################
 class PointPlotter(Plotter):
-    def __init__(self, filename, nameout, **kwargs):
-
+    def __init__(self, filename, intfile, nameout, **kwargs):
         kwargs["title"] = "Cell Density Tool"
         kwargs["bg"] = "black"
         initfile = kwargs.pop("init", None)
-        
+
         super().__init__(**kwargs)
 
         self.point_size = 8
         self.point_color = "red7"
-        self.filename = filename
+        self.denfile = filename
+        self.intfile = intfile
         self.nameout = nameout
-        self.pic = Picture(filename).flip("y")#.smooth(1)
+        self.pic = Picture(filename).flip("y")  # .smooth(1)
+        self.picgfp = Picture(intfile).flip("y").off()
 
         self.cpoints = []
         self.points = None
         if initfile is not None:
             try:
-                self.cpoints = np.loadtxt(initfile, delimiter=",")[:,(0,1)].tolist()
-                self.points = Points(self.cpoints).ps(self.point_size).c(self.point_color)
+                self.cpoints = np.loadtxt(initfile, delimiter=",")[:, (0, 1)].tolist()
+                self.points = (
+                    Points(self.cpoints).ps(self.point_size).c(self.point_color)
+                )
             except FileNotFoundError:
                 printc("No init file", initfile, "continue.", c="y")
-        
-        tx = Text2D(self.filename, font="Calco", s=0.9, bg='yellow3', alpha=0.75)
-        self += [self.pic, self.points, instructions, tx]
+
+        tx = Text2D(self.denfile, font="Calco", s=0.9, bg="yellow3", alpha=0.75)
+        self += [self.pic, self.picgfp, self.points, instructions, tx]
 
         self.add_callback("key press", self.on_key_press)
         self.add_callback("left mouse click", self.on_left_click)
@@ -64,16 +69,22 @@ class PointPlotter(Plotter):
             self.update()
 
     def on_key_press(self, evt):
+        print(evt.keypress.lower())
         if "q" in evt.keypress.lower():
             out = np.round(self.cpoints).astype(int)
             # because one can forget to save the points
-            np.savetxt("tmp_saved_coords.csv", out, fmt='%i', delimiter=",")
+            np.savetxt("tmp_saved_coords.csv", out, fmt="%i", delimiter=",")
             self.close()
             return
         elif evt.keypress == "w":
             out = np.round(self.cpoints).astype(int)
-            np.savetxt(self.nameout, out, fmt='%i', delimiter=",")
+            np.savetxt(self.nameout, out, fmt="%i", delimiter=",")
             printc(f"Saved {len(out)} cells in file {self.nameout}", c="b", invert=True)
+        elif "a" in evt.keypress.lower():
+            print("This should be working!")
+            self.pic.toggle()
+            self.picgfp.toggle()
+            self.render()
 
     def update(self):
         self.remove(self.points)  # remove old points
@@ -89,8 +100,11 @@ class PointPlotter(Plotter):
             exit()
         return np.round(self.cpoints).astype(int)[:, (0, 1)]
 
-    # def get_intensities(self):  # TODO get intensities of GFP
-    #     return np.round(self.cpoints).astype(int)[:, 2]
+    def get_intensities(self):  # TODO get intensities of GFP
+        intensities = self.picgfp.tonumpy()
+        coordinates = np.array(self.cpoints).astype(int)
+        x, y = np.transpose(np.array(coordinates))
+        return intensities[x, y]
 
     def compute_density(self, radius):
         cc = self.get_coordinates()
