@@ -53,7 +53,7 @@ hst = histogram(
 )
 
 
-def pick_treshold(event, data=data): 
+def pick_treshold(event, data=data):
     global mat
     if not event.actor:
         return
@@ -61,7 +61,7 @@ def pick_treshold(event, data=data):
     treshold = event.picked3d[0]
     bin_data = (data > treshold).astype(np.int_)
 
-    plt.at(1).clear().remove(mat)
+    # plt.at(1).clear().remove(mat)
     mat = matrix(
         bin_data,
         cmap="Greys",
@@ -69,7 +69,7 @@ def pick_treshold(event, data=data):
         scale=0,  # size of bin labels; set it to 0 to remove labels
         lw=1,  # separator line width
     )
-    plt.at(1).add(mat)
+    plt.at(1).remove('Matrix').add(mat)
     plt.render()
 
 

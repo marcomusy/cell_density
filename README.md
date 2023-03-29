@@ -5,7 +5,7 @@
 
 Install vedo dev:
 ```
- pip install -U git+https://github.com/marcomusy/vedo.git\n\n
+ pip install -U git+https://github.com/marcomusy/vedo.git
 ```
 
 Run:
