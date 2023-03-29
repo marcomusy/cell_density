@@ -1,6 +1,6 @@
 import numpy as np
-from vedo import printc, settings, probe_points
-from vedo import Plotter, Picture, Points, Text2D
+from scipy import signal
+from vedo import Picture, Plotter, Points, Text2D, printc, probe_points, settings
 
 settings.use_parallel_projection = True
 settings.enable_default_keyboard_callbacks = False
@@ -9,7 +9,8 @@ txt = """Click to add a point
 Right-click to remove it
 Press w to write points
 Press q to continue
-Press a to toggle image"""
+Press a to toggle gfp image
+Press s to toggle edu image - in work"""
 instructions = Text2D(
     txt, pos="bottom-left", font="Quikhand", c="white", bg="green4", alpha=0.75
 )
@@ -43,7 +44,7 @@ class PointPlotter(Plotter):
             except FileNotFoundError:
                 printc("No init file", initfile, "continue.", c="y")
 
-        tx = Text2D(self.denfile, font="Calco", s=0.9, bg="yellow3", alpha=0.75)
+        tx = Text2D(self.denfile.split('.')[0], font="Calco", s=0.9, bg="yellow3", alpha=0.75)
         self += [self.pic, self.picgfp, self.points, instructions, tx]
 
         self.add_callback("key press", self.on_key_press)
@@ -69,7 +70,6 @@ class PointPlotter(Plotter):
             self.update()
 
     def on_key_press(self, evt):
-        print(evt.keypress.lower())
         if "q" in evt.keypress.lower():
             out = np.round(self.cpoints).astype(int)
             # because one can forget to save the points
@@ -81,10 +81,10 @@ class PointPlotter(Plotter):
             np.savetxt(self.nameout, out, fmt="%i", delimiter=",")
             printc(f"Saved {len(out)} cells in file {self.nameout}", c="b", invert=True)
         elif "a" in evt.keypress.lower():
-            print("This should be working!")
             self.pic.toggle()
             self.picgfp.toggle()
             self.render()
+        # elif "s" in evt.keypress.lower():
 
     def update(self):
         self.remove(self.points)  # remove old points
@@ -100,11 +100,13 @@ class PointPlotter(Plotter):
             exit()
         return np.round(self.cpoints).astype(int)[:, (0, 1)]
 
-    def get_intensities(self):  # TODO get intensities of GFP
+    def get_intensities(self, radius):
         intensities = self.picgfp.tonumpy()
         coordinates = np.array(self.cpoints).astype(int)
         x, y = np.transpose(np.array(coordinates))
-        return intensities[x, y]
+        kernel = np.ones((radius, radius)) / (radius * radius)
+        conv = signal.convolve2d(intensities, kernel, boundary="symm", mode="same")
+        return conv[x, y]
 
     def compute_density(self, radius):
         cc = self.get_coordinates()

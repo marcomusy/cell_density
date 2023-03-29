@@ -9,7 +9,8 @@ from point_plotter import Plotter, PointPlotter
 dapiin = sys.argv[1]
 gfpin = sys.argv[2]
 nameout = dapiin.replace(".tif", "").replace(".png", "") + "_data.csv"
-radius = 100  # pixels
+dens_radius = 50  # pixels
+ints_radius = 5  # pixels
 
 plt1 = PointPlotter(dapiin, gfpin, nameout, init=nameout)
 plt1.point_color = "red5"
@@ -19,20 +20,19 @@ plt1.show(zoom="tightest", mode="image").close()
 # Analysis ################################
 settings.enable_default_keyboard_callbacks = True
 
-pts, dens, dens_array = plt1.compute_density(radius)
-intensities = plt1.get_intensities()         # TODO get intensities of GFP
-# intensities = np.random.rand(len(dens_array))  # TODO random values for now
+pts, dens, dens_array = plt1.compute_density(dens_radius)
+intensities = plt1.get_intensities(ints_radius)
 coeff = np.corrcoef(dens_array, intensities)[0][1]
 
 fig = plot(
     dens_array,
     intensities,
     title=f"Corr. coeff: {coeff: .3f} (n={len(dens_array)})",
-    xtitle=f"Density in {radius} pixels radius",
+    xtitle=f"Density in {dens_radius} pixels dens_radius",
     ytitle="Intensity",
-    lw=0,          # do not join points with lines
-    marker="*",    # marker style
-    mc="red4",     # marker color
+    lw=0,  # do not join points with lines
+    marker="*",  # marker style
+    mc="red4",  # marker color
     aspect=1 / 1,  # aspect ratio
 )
 
