@@ -3,14 +3,14 @@
 
 ### Usage
 
-Install:
+Install vedo dev:
 ```
-pip install vedo
+ pip install -U git+https://github.com/marcomusy/vedo.git\n\n
 ```
 
 Run:
 ```
-python analyse_density.py test_image.png
+python analyse_density.py test_image.png test_image_gfp.png
 ```
 
 ![](https://user-images.githubusercontent.com/32848391/221247534-65fc17a6-aa79-4246-b9fe-f09f0b10c7d9.png)
