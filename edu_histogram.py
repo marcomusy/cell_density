@@ -4,11 +4,10 @@ import numpy as np
 import vedo
 from vedo.pyplot import histogram, matrix
 
-vedo.settings.use_parallel_projection = True
-vedo.settings.remember_last_figure_format = True
 vedo.settings.default_font = "Theemim"
+vedo.settings.use_parallel_projection = True
 
-# Utils
+
 def simple_mean_window_conv(data, r):
     """
     Simple convolution.
@@ -28,22 +27,22 @@ def simple_mean_window_conv(data, r):
 
 
 def pick_threshold(event):
-    global mat
     if event.actor and event.at == 2:
         threshold = event.picked3d[0]
-        bin_data = (data > threshold).astype(np.int_)
+        bin_data = (data > threshold).astype(int)
 
-        plt.at(1).remove(mat)
         mat = matrix(
             bin_data,
             cmap="Greys",
             title=f"Threshold = {threshold:.2f}",
             scale=0,  # size of bin labels; set it to 0 to remove labels
-            lw=1,  # separator line width
+            lw=1,     # separator line width
         )
-        plt.at(1).add(mat)
-        arr = vedo.Arrow2D([threshold, 15], [threshold, 0]).z(1)
-        plt.at(2).remove("Arrow2D").add(arr)
+        # trick to avoid a small vtk bug in visualization (thin diagonal line)
+        mat.unpack(0).shrink(0.96).triangulate()
+
+        arrow.on().x(threshold)  # show arrow at threshold value
+        plt.at(1).remove("Matrix").add(mat)
         plt.render()
 
 
@@ -61,23 +60,23 @@ hst = histogram(
     xtitle=f"Intensity in r={radius} pixel window",
     c="red4",
     gap=0,  # no gap between bins
-    label="data",
     aspect=1,
 )
-# print(hst.frequencies)
+hst.verbose = False # avoid printing to stdout on every mouse click
 
 mat = matrix(
     data,
     cmap="Greys",
     title="Threshold: None",
     scale=0,  # size of bin labels; set it to 0 to remove labels
-    lw=1,  # separator line width
+    lw=1,     # separator line width
 )
+arrow = vedo.Arrow2D([0, 15], [0, 0]).z(1).off() # off initially
 
 # Plotting
-plt = vedo.Plotter(N=3, sharecam=False)
+plt = vedo.Plotter(N=3, sharecam=False, title=file)
 plt.add_callback("on_click", pick_threshold)
 plt.at(0).show(pic, zoom="tight")
-plt.at(1).show(mat, zoom="tight")
-plt.at(2).show(hst, zoom="tight", mode="image")
+plt.at(1).show(mat, zoom="tightest")
+plt.at(2).show(hst, arrow, zoom="tight", mode="image")
 plt.interactive().close()
