@@ -101,12 +101,18 @@ class PointPlotter(Plotter):
         return np.round(self.cpoints).astype(int)[:, (0, 1)]
 
     def get_intensities(self, radius):
-        intensities = self.picgfp.tonumpy()
-        coordinates = np.array(self.cpoints).astype(int)
-        x, y = np.transpose(np.array(coordinates))
+        nx, ny = self.picgfp.dimensions()
+        # Raw pixels retain the image coordinates and original bit depth.
+        pixels = self.picgfp.tonumpy(raw=True).reshape(ny, nx, -1)
+        # Average RGB channels; ignore alpha in grayscale-alpha and RGBA images.
+        if pixels.shape[-1] >= 3:
+            intensities = pixels[..., :3].mean(axis=-1)
+        else:
+            intensities = pixels[..., 0]
+        x, y = self.get_coordinates().T
         kernel = np.ones((radius, radius)) / (radius * radius)
         conv = signal.convolve2d(intensities, kernel, boundary="symm", mode="same")
-        return conv[x, y]
+        return conv[y, x]
 
     def compute_density(self, radius):
         cc = self.get_coordinates()
