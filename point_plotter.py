@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import signal
-from vedo import Picture, Plotter, Points, Text2D, printc, probe_points, settings
+from vedo import Image, Plotter, Points, Text2D, printc, settings
 
 settings.use_parallel_projection = True
 settings.enable_default_keyboard_callbacks = False
@@ -30,8 +30,8 @@ class PointPlotter(Plotter):
         self.denfile = filename
         self.intfile = intfile
         self.nameout = nameout
-        self.pic = Picture(filename).flip("y")  # .smooth(1)
-        self.picgfp = Picture(intfile).flip("y").off()
+        self.pic = Image(filename).flip("y")  # .smooth(1)
+        self.picgfp = Image(intfile).flip("y").off()
 
         self.cpoints = []
         self.points = None
@@ -111,7 +111,7 @@ class PointPlotter(Plotter):
     def compute_density(self, radius):
         cc = self.get_coordinates()
         pts = Points(cc)
-        vol = pts.density(radius).c("YlOrRd").alpha(1)  # returns a Volume
+        vol = pts.density(radius).cmap("YlOrRd").alpha(1)  # returns a Volume
         vol.add_scalarbar3d(title=f"Density (counts in r_search ={radius})", c="k")
-        mpts = probe_points(vol, pts).ps(5).c("black")
+        mpts = pts.probe(vol).ps(5).c("black")
         return mpts, vol, mpts.pointdata["ImageScalars"]
